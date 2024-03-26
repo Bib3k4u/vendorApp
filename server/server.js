@@ -5,13 +5,45 @@ const cors = require('cors');
 const { Sequelize, DataTypes } = require('sequelize');
 
 // Sequelize setup
-const sequelize = new Sequelize('vendor', 'root', 'root', {
+const sequelize = new Sequelize('vendorapp', 'root', 'root', {
   host: 'localhost',
   dialect: 'mysql'
 });
 
 // Model definition
 const Pdf = sequelize.define('Pdf', {
+  shopName: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  vendorName: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  contactNo: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  category: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  city: {
+    type: DataTypes.STRING, // Adding City field
+    allowNull: false
+  },
+  locality: {
+    type: DataTypes.STRING, // Adding Locality field
+    allowNull: false
+  },
+  latitude: {
+    type: DataTypes.FLOAT,
+    allowNull: false
+  },
+  longitude: {
+    type: DataTypes.FLOAT,
+    allowNull: false
+  },
   name: {
     type: DataTypes.STRING,
     allowNull: false
@@ -34,8 +66,22 @@ const upload = multer({ storage: storage });
 // PDF upload endpoint
 app.post('/pdf/upload', upload.single('pdf'), async (req, res) => {
   try {
+    const { shopName, vendorName, contactNo, category, city, locality, latitude, longitude } = req.body;
     const { originalname, buffer } = req.file;
-    const pdf = await Pdf.create({ name: originalname, data: buffer });
+
+    const pdf = await Pdf.create({
+      shopName,
+      vendorName,
+      contactNo,
+      category,
+      city,
+      locality,
+      latitude,
+      longitude,
+      name: originalname,
+      data: buffer
+    });
+
     res.status(201).json(pdf);
   } catch (error) {
     console.error(error);
@@ -44,10 +90,15 @@ app.post('/pdf/upload', upload.single('pdf'), async (req, res) => {
 });
 
 // Get all PDF names
+// Get all PDF data
 app.get('/pdf', async (req, res) => {
   try {
-    const pdfList = await Pdf.findAll({ attributes: ['name'] });
-    res.json(pdfList);
+    const pdfList = await Pdf.findAll();
+    const pdfDataList = await Promise.all(pdfList.map(async pdf => {
+      const { name, data, ...rest } = pdf.toJSON();
+      return { name, data: data.toString('base64'), ...rest };
+    }));
+    res.json(pdfDataList);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
