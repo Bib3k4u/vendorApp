@@ -5,8 +5,8 @@ const cors = require('cors');
 const { Sequelize, DataTypes } = require('sequelize');
 
 // Sequelize setup
-const sequelize = new Sequelize('vendorapp', 'root', 'root', {
-  host: 'localhost',
+const sequelize = new Sequelize('bw6tgzw9k3xnzfwkdotd', 'uvbjzeragsupdkmx', 'Pz9LreP7jGXfhk5MUMYA', {
+  host: 'bw6tgzw9k3xnzfwkdotd-mysql.services.clever-cloud.com',
   dialect: 'mysql'
 });
 
